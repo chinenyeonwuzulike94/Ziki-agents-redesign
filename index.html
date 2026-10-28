@@ -293,6 +293,49 @@ footer{
 }
 
 /* ---------------- dialogs, toast ---------------- */
+dialog.wide{width:min(560px,calc(100vw - 32px))}
+.dlg-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:16px}
+.dlg-head .icon-btn{flex:0 0 auto}
+.dlg-head h3{margin:0 0 5px}
+.dlg-head p{margin:0;font-size:13px;color:var(--muted)}
+.req-list{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:10px;max-height:min(52vh,420px);overflow:auto}
+.req{border:1px solid var(--border);border-radius:13px;padding:13px 14px;background:var(--bg)}
+.req .rtop{display:flex;gap:11px;align-items:flex-start}
+.req .who{
+  width:32px;height:32px;flex:0 0 32px;border-radius:10px;display:grid;place-items:center;
+  background:var(--tint);color:var(--accent);font-size:11px;font-weight:800;
+}
+.req .rtitle{font-size:13.5px;font-weight:700;line-height:1.4}
+.req .rmeta{margin:4px 0 0;font-size:12px;color:var(--muted)}
+.req .ract{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center}
+.req.done{opacity:.65}
+.state{
+  font-size:11.5px;font-weight:800;letter-spacing:.03em;color:var(--ok-fg);background:var(--ok-bg);
+  border-radius:999px;padding:5px 11px;
+}
+.state.off{color:var(--muted);background:var(--chip)}
+.kind{
+  display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  background:var(--warn-bg);color:var(--warn-fg);border-radius:999px;padding:3px 8px;margin-bottom:7px;
+}
+.kind.esc{background:var(--bad-bg);color:var(--bad-fg)}
+.rwait{margin:7px 0 0;font-size:11.5px;font-weight:600;color:var(--muted)}
+.caught-up{display:flex;gap:13px;align-items:center;padding:20px 6px 8px;list-style:none}
+.cu-ic{
+  width:40px;height:40px;flex:0 0 40px;border-radius:999px;display:grid;place-items:center;
+  background:var(--ok-bg);color:var(--ok-fg);
+}
+.caught-up b{display:block;font-size:14.5px}
+.caught-up p{margin:3px 0 0;font-size:12.5px;color:var(--muted);max-width:38ch}
+.log{list-style:none;margin:0 0 16px;padding:0;display:grid;max-height:min(50vh,400px);overflow:auto}
+.log li{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;padding:12px 2px;border-bottom:1px solid var(--divider)}
+.log li:last-child{border-bottom:0}
+.li-ic{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:var(--chip);color:var(--text2)}
+.li-t{font-size:13px;font-weight:700;line-height:1.4}
+.li-m{font-size:12px;color:var(--muted);margin-top:3px}
+.li-time{font-size:11.5px;color:var(--muted);white-space:nowrap;padding-top:2px}
+.log .seg{margin-bottom:12px}
+.log-empty{font-size:13px;color:var(--muted);padding:14px 0}
 dialog{
   border:1px solid var(--border);background:var(--surface);color:var(--text);
   border-radius:18px;padding:22px;width:min(430px,calc(100vw - 32px));box-shadow:var(--shadow);
@@ -392,8 +435,8 @@ dialog p{margin:0 0 16px;color:var(--text2);font-size:13px}
     <a href="#">Marketing</a>
     <a href="#">Security</a>
     <span class="mhint">This page</span>
-    <a href="#">Activity & approvals</a>
-    <a href="#">Agent audit log</a>
+    <a href="#" data-open="activity">Activity & approvals</a>
+    <a href="#" data-open="audit">Agent audit log</a>
   </div>
 </header>
 
@@ -412,8 +455,8 @@ dialog p{margin:0 0 16px;color:var(--text2);font-size:13px}
       <p class="sub">Every agent gets its own key. Use each key for one agent only.</p>
     </div>
     <div class="head-actions">
-      <a class="btn" href="#">Activity & approvals</a>
-      <a class="btn" href="#">Agent audit log</a>
+      <button class="btn" type="button" id="openActivity">Activity & approvals</button>
+      <button class="btn" type="button" id="openAudit">Agent audit log</button>
       <button class="btn btn-primary" id="createBtn" type="button">
         <svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
         Create agent
@@ -540,6 +583,43 @@ dialog p{margin:0 0 16px;color:var(--text2);font-size:13px}
   <div class="dialog-actions">
     <button class="btn btn-primary" id="keyCopy" type="button">Copy key</button>
     <button class="btn" id="keyDone" type="button">Done</button>
+  </div>
+</dialog>
+
+<dialog id="activityDialog" class="wide" aria-labelledby="activityTitle">
+  <div class="dlg-head">
+    <div>
+      <h3 id="activityTitle">Waiting on you</h3>
+      <p>Your agents paused here. Nothing moves until you decide.</p>
+    </div>
+    <button class="icon-btn" data-close="activityDialog" type="button" aria-label="Close">
+      <svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <ul class="req-list" id="reqList"></ul>
+  <div class="dialog-actions">
+    <button class="btn" data-close="activityDialog" type="button">Close</button>
+  </div>
+</dialog>
+
+<dialog id="auditDialog" class="wide" aria-labelledby="auditTitle">
+  <div class="dlg-head">
+    <div>
+      <h3 id="auditTitle">Agent audit log</h3>
+      <p>Everything your agents did, newest first.</p>
+    </div>
+    <button class="icon-btn" data-close="auditDialog" type="button" aria-label="Close">
+      <svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="seg" role="tablist" aria-label="Filter the audit log" id="auditTabs">
+    <button role="tab" aria-selected="true" data-kind="all">Everything</button>
+    <button role="tab" aria-selected="false" data-kind="work">Agent work</button>
+    <button role="tab" aria-selected="false" data-kind="security">Keys & levels</button>
+  </div>
+  <ol class="log" id="logList"></ol>
+  <div class="dialog-actions">
+    <button class="btn" data-close="auditDialog" type="button">Close</button>
   </div>
 </dialog>
 
@@ -861,6 +941,124 @@ dialog p{margin:0 0 16px;color:var(--text2);font-size:13px}
     document.getElementById("keyCopy").textContent = "Copy key";
   });
 
+  /* ---------------- activity & audit ---------------- */
+  const REQUESTS = [
+    { id:"r1", kind:"Decision", esc:false, who:"Chinenye · triager", ini:"CH",
+      title:"Close #1282 as a duplicate of #1249?",
+      meta:"Two reports describe the same missing key handler. Approving lets the agent merge them.",
+      waiting:"Asked 2h ago",
+      actions:["Approve","Decline"], done:"" },
+    { id:"r2", kind:"Decision", esc:false, who:"Chinenye · reviewer", ini:"CH",
+      title:"Raise your write budget to 400 per hour?",
+      meta:"26 of your 30 hourly writes are already used. Approving lifts the limit for everyone in this workspace.",
+      waiting:"Asked 5h ago",
+      actions:["Approve","Decline"], done:"" },
+    { id:"r3", kind:"Needs you", esc:true, who:"Docs scout · observer", ini:"DS",
+      title:"Docs scout stopped on #388 and wants your answer",
+      meta:"It will not guess on product decisions. Open the issue to answer, or snooze to come back later.",
+      waiting:"Waiting 1 day",
+      actions:["Open issue","Snooze"], done:"" }
+  ];
+  const PAST = {Approve:"Approved", Decline:"Declined", "Open issue":"Opened", Snooze:"Snoozed"};
+
+  const LOG_ICONS = {
+    check:'<svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4 10-10"/></svg>',
+    review:'<svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2Z"/></svg>',
+    eye:'<svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
+    level:'<svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="7" cy="18" r="2" fill="currentColor" stroke="none"/></svg>',
+    key:'<svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="m11 12 8-8 3 3-2 2 2 2-3 3-2-2-3 3"/></svg>'
+  };
+  const LOGS = [
+    { kind:"work", ic:"check", t:"Chinenye cleared #1291 as not a duplicate",
+      m:"Triage note states the matching method and its limits", time:"12 min ago" },
+    { kind:"work", ic:"review", t:"Chinenye posted a review on #1274",
+      m:"Confidence 95 · source inspected, not reproduced", time:"1 h ago" },
+    { kind:"work", ic:"eye", t:"Docs scout read 42 issues in Product",
+      m:"Observer level is read only, nothing was changed", time:"3 h ago" },
+    { kind:"security", ic:"level", t:"You set Chinenye to Reviewer",
+      m:"Permissions apply on the agent's next request", time:"Yesterday" },
+    { kind:"security", ic:"key", t:"You regenerated the key for Chinenye",
+      m:"The previous key stopped working immediately", time:"Yesterday" },
+    { kind:"security", ic:"level", t:"Docs scout was created as an Observer",
+      m:"Read only, no write access", time:"2 days ago" }
+  ];
+
+  const reqList = document.getElementById("reqList");
+  const renderReqs = () => {
+    if (REQUESTS.every(r => r.done)) {
+      reqList.innerHTML = `
+        <li class="caught-up">
+          <span class="cu-ic" aria-hidden="true">
+            <svg class="i" viewBox="0 0 24 24"><path d="m5 13 4 4 10-10"/></svg>
+          </span>
+          <div><b>All caught up</b><p>No agent is waiting on you right now. They are working within their roles.</p></div>
+        </li>`;
+      return;
+    }
+    reqList.innerHTML = REQUESTS.map(r => `
+      <li class="req${r.done ? " done" : ""}" data-id="${r.id}">
+        <div class="rtop">
+          <span class="who" aria-hidden="true">${r.ini}</span>
+          <div>
+            <span class="kind${r.esc ? " esc" : ""}">${r.kind}</span>
+            <div class="rtitle">${r.title}</div>
+            <p class="rmeta">${r.meta}</p>
+            <p class="rwait">${r.who} · ${r.waiting}</p>
+          </div>
+        </div>
+        <div class="ract">
+          ${r.done
+            ? `<span class="state${r.done === "Declined" || r.done === "Snoozed" ? " off" : ""}">${r.done}</span>`
+            : `<button class="btn btn-sm btn-primary" data-req="ok" type="button">${r.actions[0]}</button>
+               <button class="btn btn-sm" data-req="no" type="button">${r.actions[1]}</button>`}
+        </div>
+      </li>`).join("");
+  };
+  reqList.addEventListener("click", e => {
+    const b = e.target.closest("[data-req]");
+    if (!b) return;
+    const li = b.closest(".req");
+    const r = REQUESTS.find(x => x.id === li.dataset.id);
+    const label = b.dataset.req === "ok" ? r.actions[0] : r.actions[1];
+    r.done = PAST[label];
+    renderReqs();
+    toast(r.done);
+  });
+
+  const logList = document.getElementById("logList");
+  const auditTabs = document.getElementById("auditTabs");
+  let logKind = "all";
+  const renderLog = () => {
+    const rows = LOGS.filter(l => logKind === "all" || l.kind === logKind);
+    logList.innerHTML = rows.length
+      ? rows.map(l => `
+          <li><span class="li-ic" aria-hidden="true">${LOG_ICONS[l.ic]}</span>
+            <div><div class="li-t">${l.t}</div><div class="li-m">${l.m}</div></div>
+            <time class="li-time">${l.time}</time></li>`).join("")
+      : '<li class="log-empty">Nothing here yet.</li>';
+  };
+  auditTabs.addEventListener("click", e => {
+    const tab = e.target.closest('[role="tab"]');
+    if (!tab) return;
+    auditTabs.querySelectorAll('[role="tab"]').forEach(t => t.setAttribute("aria-selected", "false"));
+    tab.setAttribute("aria-selected", "true");
+    logKind = tab.dataset.kind;
+    renderLog();
+  });
+
+  const openDialog = id => document.getElementById(id).showModal();
+  document.getElementById("openActivity").addEventListener("click", () => openDialog("activityDialog"));
+  document.getElementById("openAudit").addEventListener("click", () => openDialog("auditDialog"));
+  document.querySelectorAll("[data-close]").forEach(b =>
+    b.addEventListener("click", () => document.getElementById(b.dataset.close).close()));
+  document.querySelectorAll("[data-open]").forEach(a => a.addEventListener("click", e => {
+    e.preventDefault();
+    setNav(false);
+    openDialog(a.dataset.open === "activity" ? "activityDialog" : "auditDialog");
+  }));
+
+  renderReqs();
+  renderLog();
   render();
 })();
 </script>
