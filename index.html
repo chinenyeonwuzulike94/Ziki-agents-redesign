@@ -1,0 +1,868 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Agents · Settings · Ziki</title>
+<meta name="description" content="A cleaner, more hierarchical take on Ziki's agents settings page." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   Ziki design tokens (from ziki.dev --zk-* variables)
+   ============================================================ */
+:root{
+  --bg:#f5f7fc; --surface:#fff; --surface-2:#f8fafd;
+  --text:#15121f; --text2:#3e4a63; --muted:#5f6577;
+  --border:#e3e8f2; --divider:#eef1f7;
+  --tint:#eaf2fe; --chip:#f0f2f7; --seg:#eef1f6;
+  --accent:#1f5fd9; --accent-text:#fff; --accent-soft:#eaf2fe;
+  --ok-bg:#e3f6ec; --ok-fg:#146c43;
+  --bad-bg:#fde8e4; --bad-fg:#a3261a; --bad-bd:#f4b3a8;
+  --warn-bg:#fdf3d7; --warn-fg:#7a4e00; --warn-bd:#f0cd72;
+  --info-bg:#e7f0ff; --info-fg:#1d4fb8;
+  --focus:#1f5fd9;
+  --shadow:0 1px 2px rgba(16,24,40,.05), 0 16px 40px -26px rgba(16,24,40,.4);
+  color-scheme:light;
+}
+[data-theme="dark"]{
+  --bg:#070f22; --surface:#0e1a33; --surface-2:#111f3c;
+  --text:#e8eef9; --text2:#b7c3da; --muted:#93a0b8;
+  --border:#22324f; --divider:#1a2844;
+  --tint:#15284a; --chip:#1b2a47; --seg:#0a1530;
+  --accent:#8fc9ff; --accent-text:#07122a; --accent-soft:#15284a;
+  --ok-bg:#0f3326; --ok-fg:#6ee7a8;
+  --bad-bg:#3a1517; --bad-fg:#fca5a0; --bad-bd:#6b2a27;
+  --warn-bg:#3a2c0c; --warn-fg:#f6cf6b; --warn-bd:#6b5216;
+  --info-bg:#14294f; --info-fg:#9cc2ff;
+  --focus:#8fc9ff;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 18px 44px -28px rgba(0,0,0,.85);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:13.5px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  transition:background .18s ease, color .18s ease;
+}
+a{color:var(--accent); text-decoration:none}
+a:hover{text-decoration:underline}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus); outline-offset:2px; border-radius:8px}
+svg.i{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+svg.i.sm{width:15px;height:15px}
+.wrap{max-width:1060px;margin:0 auto;padding:0 24px}
+
+/* ---------------- top bar ---------------- */
+.topbar{
+  position:sticky;top:0;z-index:40;
+  background:color-mix(in srgb, var(--bg) 90%, transparent);
+  backdrop-filter:saturate(160%) blur(10px);
+  border-bottom:1px solid var(--border);
+}
+.topbar-in{display:flex;align-items:center;gap:14px;height:56px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:800;letter-spacing:-.02em;font-size:15.5px;color:var(--text)}
+.brand:hover{text-decoration:none}
+.logo{
+  width:25px;height:25px;border-radius:8px;display:grid;place-items:center;
+  background:linear-gradient(140deg,var(--accent),#7c5cff);color:#fff;font-size:12px;font-weight:800;
+}
+.ws{
+  display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 12px;
+  border:1px solid var(--border);background:var(--surface);border-radius:999px;
+  font-size:12.5px;font-weight:600;color:var(--text2);cursor:pointer;
+}
+.ws:hover{background:var(--tint)}
+.topnav{display:flex;gap:4px;margin-left:6px}
+.topnav a{padding:6px 11px;border-radius:999px;font-size:13px;font-weight:600;color:var(--muted)}
+.topnav a:hover{color:var(--text);background:var(--tint);text-decoration:none}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.icon-btn{
+  width:36px;height:36px;display:grid;place-items:center;border-radius:999px;
+  border:1px solid var(--border);background:var(--surface);cursor:pointer;color:var(--text2);
+}
+.icon-btn:hover{background:var(--tint);color:var(--text)}
+.bell{position:relative}
+.bell .dot-badge{
+  position:absolute;top:3px;right:3px;min-width:15px;height:15px;padding:0 3px;
+  background:var(--accent);color:var(--accent-text);border-radius:999px;
+  font-size:9.5px;font-weight:800;display:grid;place-items:center;border:2px solid var(--surface);
+}
+.avatar{
+  width:34px;height:34px;border-radius:999px;display:grid;place-items:center;
+  background:#db2777;color:#fff;font-size:13px;font-weight:700;border:2px solid var(--surface);
+}
+.pts{
+  display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 13px;border-radius:999px;
+  background:var(--warn-bg);color:var(--warn-fg);border:1px solid var(--warn-bd);
+  font-size:12.5px;font-weight:800;letter-spacing:-.01em;cursor:pointer;
+}
+.pts:hover{filter:brightness(.97);text-decoration:none}
+.pts svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.burger{display:none}
+/* mobile nav panel */
+.mnav{
+  position:absolute;left:0;right:0;top:100%;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:8px 24px 14px;display:flex;flex-direction:column;gap:2px;
+  box-shadow:var(--shadow);
+}
+.mnav[hidden]{display:none}
+.mnav a{padding:11px 8px;border-radius:10px;font-size:14.5px;font-weight:600;color:var(--text2)}
+.mnav a:hover{background:var(--tint);color:var(--text);text-decoration:none}
+.mnav .mhint{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 8px 4px}
+
+/* ---------------- page head ---------------- */
+main{padding:24px 0 64px}
+.crumbs{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);margin-bottom:16px}
+.crumbs a{color:var(--muted);font-weight:600}
+.crumbs a:hover{color:var(--accent)}
+.crumbs .cur{color:var(--text);font-weight:600}
+.crumbs svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;opacity:.65}
+.page-head{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;justify-content:space-between}
+h1{font-size:24px;line-height:1.2;font-weight:800;letter-spacing:-.02em;margin:0 0 5px}
+.sub{margin:0;color:var(--muted);font-size:13.5px;max-width:54ch}
+.head-actions{display:flex;flex-wrap:wrap;gap:8px}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;
+  transition:background .12s ease, border-color .12s ease, transform .06s ease;
+  white-space:nowrap;
+}
+.btn:hover{background:var(--tint);text-decoration:none}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--accent);border-color:transparent;color:var(--accent-text)}
+.btn-primary:hover{background:color-mix(in srgb,var(--accent) 88%, #000)}
+.btn-sm{height:29px;padding:0 11px;font-size:12px}
+.btn-danger{color:var(--bad-fg);border-color:var(--bad-bd);background:var(--bad-bg)}
+
+/* ---------------- stats ---------------- */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:26px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px}
+.stat .k{font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.stat .v{font-size:22px;font-weight:800;letter-spacing:-.02em;margin-top:6px;display:flex;align-items:baseline;gap:6px}
+.stat .v small{font-size:12.5px;font-weight:600;color:var(--muted);letter-spacing:0}
+.stat .f{font-size:12px;color:var(--muted);margin-top:4px}
+.meter{height:6px;border-radius:999px;background:var(--seg);margin-top:12px;overflow:hidden}
+.meter i{display:block;height:100%;border-radius:999px;background:var(--accent);transition:width .3s ease}
+
+/* ---------------- sections ---------------- */
+.section{margin-top:44px;padding-top:32px;border-top:1px solid var(--divider)}
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.sec-label{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 4px}
+h2{font-size:16.5px;font-weight:800;letter-spacing:-.015em;margin:0}
+.sec-note{font-size:12.5px;color:var(--muted);margin:0;max-width:48ch;text-align:right}
+
+/* ---------------- toolbar ---------------- */
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.search{position:relative;flex:1;min-width:230px;max-width:320px}
+.search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.search input{
+  width:100%;height:36px;padding:0 14px 0 36px;border-radius:999px;
+  border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;
+}
+.search input::placeholder{color:var(--muted)}
+.seg{display:flex;gap:4px;padding:4px;background:var(--seg);border:1px solid var(--border);border-radius:999px;overflow-x:auto;scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
+.seg button{
+  border:0;background:transparent;color:var(--text2);font-size:12.5px;font-weight:700;
+  padding:6px 13px;border-radius:999px;cursor:pointer;white-space:nowrap;
+}
+.seg button:hover{color:var(--text)}
+.seg button[aria-selected="true"]{background:var(--surface);color:var(--text);box-shadow:0 1px 2px rgba(16,24,40,.12)}
+
+/* ---------------- agent cards ---------------- */
+.agents{display:grid;gap:12px;list-style:none;margin:0;padding:0}
+.agent{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:18px;box-shadow:var(--shadow);
+  display:grid;grid-template-columns:1.1fr .9fr;gap:22px;
+  transition:border-color .15s ease;
+}
+.agent:hover{border-color:color-mix(in srgb,var(--accent) 45%, var(--border))}
+.agent.is-revoked{opacity:.75}
+.a-id{display:flex;gap:14px;min-width:0}
+.a-avatar{
+  width:40px;height:40px;flex:0 0 40px;border-radius:12px;display:grid;place-items:center;
+  background:var(--tint);color:var(--accent);font-weight:800;font-size:13px;border:1px solid var(--border);
+}
+.a-name{font-size:14.5px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.badge{
+  display:inline-flex;align-items:center;height:19px;padding:0 8px;border-radius:999px;
+  font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
+  background:var(--info-bg);color:var(--info-fg);
+}
+.badge.role-triager{background:var(--warn-bg);color:var(--warn-fg)}
+.badge.role-reviewer{background:var(--ok-bg);color:var(--ok-fg)}
+.badge.role-contributor{background:var(--tint);color:var(--accent)}
+.badge.role-dispatcher,.badge.role-merger,.badge.role-admin{background:var(--chip);color:var(--text2)}
+.badge.is-revoked{background:var(--bad-bg);color:var(--bad-fg)}
+.a-meta{margin:5px 0 0;color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+.a-meta b{color:var(--text2);font-weight:600}
+.dot{width:3px;height:3px;border-radius:50%;background:currentColor;display:inline-block;opacity:.7}
+.a-links{margin-top:9px;display:flex;gap:15px;font-size:12px;font-weight:600}
+.a-right{display:flex;flex-direction:column;gap:10px;min-width:0}
+.keyrow{
+  display:flex;align-items:center;gap:9px;background:var(--seg);border:1px solid var(--border);
+  border-radius:12px;padding:7px 8px 7px 13px;
+}
+.keyrow code{
+  font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:12.5px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;
+}
+.ctrls{display:flex;gap:9px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.field{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);font-weight:700}
+.field select{
+  height:32px;padding:0 28px 0 11px;border-radius:999px;border:1px solid var(--border);
+  background:var(--surface);font-size:12.5px;font-weight:700;color:var(--text);cursor:pointer;
+  appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);
+  background-position:calc(100% - 16px) 14px, calc(100% - 12px) 14px;
+  background-size:4px 4px,4px 4px;background-repeat:no-repeat;
+}
+/* overflow menu */
+.menu-wrap{position:relative}
+.kebab{width:32px;height:32px}
+.menu{
+  position:absolute;right:0;top:calc(100% + 7px);z-index:30;
+  min-width:216px;background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;box-shadow:var(--shadow);padding:7px;
+}
+.menu[hidden]{display:none}
+.menu-label{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:7px 9px 5px}
+.menu select{
+  width:100%;height:33px;border-radius:9px;border:1px solid var(--border);
+  background:var(--bg);color:var(--text);font-size:13px;font-weight:600;padding:0 9px;margin-bottom:7px;
+}
+.mi{
+  display:flex;width:100%;align-items:center;gap:9px;border:0;background:transparent;
+  padding:9px;border-radius:9px;font-size:13px;font-weight:600;color:var(--text2);
+  cursor:pointer;text-align:left;
+}
+.mi:hover{background:var(--tint);color:var(--text)}
+.mi.danger{color:var(--bad-fg)}
+.mi.danger:hover{background:var(--bad-bg)}
+.menu hr{border:0;border-top:1px solid var(--divider);margin:6px 4px}
+.areas{border-top:1px solid var(--divider);padding-top:12px;margin-top:2px}
+.areas summary{
+  cursor:pointer;font-size:12.5px;font-weight:700;color:var(--text2);list-style:none;
+  display:inline-flex;align-items:center;gap:7px;user-select:none;
+}
+.areas summary::-webkit-details-marker{display:none}
+.areas summary svg{transition:transform .15s ease;color:var(--muted)}
+.areas[open] summary svg{transform:rotate(90deg)}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.chip{
+  font-size:11.5px;font-weight:700;color:var(--text2);background:var(--chip);
+  border:1px solid var(--border);border-radius:999px;padding:4px 11px;
+}
+.empty{
+  border:1px dashed var(--border);border-radius:18px;padding:38px 20px;text-align:center;color:var(--muted);
+  background:var(--surface);
+}
+.empty b{display:block;color:var(--text);font-size:15px;margin-bottom:5px}
+
+/* ---------------- roles ---------------- */
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:10px;margin:0;padding:0;list-style:none}
+.role{
+  background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:13px 15px;
+  transition:transform .12s ease, border-color .12s ease;
+}
+.role:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent) 40%, var(--border))}
+.role .rn{display:flex;align-items:center;justify-content:space-between;gap:9px;font-weight:700;font-size:13px}
+.role .rd{margin:5px 0 0;font-size:12.5px;color:var(--text2);line-height:1.5}
+.tag{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--warn-fg);background:var(--warn-bg);border-radius:999px;padding:3px 8px}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:12px;margin-top:14px}
+.note{
+  display:flex;gap:10px;align-items:flex-start;border-radius:13px;padding:12px 14px;font-size:12.5px;line-height:1.55;
+  background:var(--tint);color:var(--text2);border:1px solid var(--border);
+}
+.note.warn{background:var(--warn-bg);color:var(--warn-fg);border-color:var(--warn-bd)}
+.note svg{margin-top:2px;flex:0 0 auto}
+.note b{color:inherit}
+
+footer{
+  border-top:1px solid var(--border);margin-top:48px;padding:18px 0 30px;
+  color:var(--muted);font-size:12px;display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;
+}
+
+/* ---------------- dialogs, toast ---------------- */
+dialog{
+  border:1px solid var(--border);background:var(--surface);color:var(--text);
+  border-radius:18px;padding:22px;width:min(430px,calc(100vw - 32px));box-shadow:var(--shadow);
+}
+dialog::backdrop{background:rgba(4,10,24,.55);backdrop-filter:blur(2px)}
+dialog h3{margin:0 0 6px;font-size:16.5px;font-weight:800;letter-spacing:-.01em}
+dialog p{margin:0 0 16px;color:var(--text2);font-size:13px}
+.dialog-actions{display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap}
+.form-field{display:block;margin-bottom:15px}
+.form-field span{display:block;font-size:11px;font-weight:800;color:var(--muted);margin-bottom:7px;text-transform:uppercase;letter-spacing:.07em}
+.form-field input,.form-field select{
+  width:100%;height:40px;border-radius:11px;border:1px solid var(--border);background:var(--bg);
+  padding:0 13px;font-size:14px;color:var(--text);
+}
+.kreveal{
+  font-family:"JetBrains Mono",monospace;font-size:12.5px;background:var(--bg);border:1px solid var(--border);
+  border-radius:11px;padding:12px 13px;word-break:break-all;color:var(--text2);margin-bottom:16px;
+}
+#toast{
+  position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);
+  background:var(--text);color:var(--bg);font-size:13px;font-weight:600;
+  padding:11px 18px;border-radius:999px;opacity:0;pointer-events:none;
+  transition:opacity .2s ease, transform .2s ease;z-index:80;box-shadow:var(--shadow);
+}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ---------------- responsive ---------------- */
+@media (max-width:960px){
+  .topnav,.ws{display:none}
+  .burger{display:grid}
+  .stats{grid-template-columns:1fr 1fr}
+  .stat:last-child{grid-column:span 2}
+  .sec-note{text-align:left;max-width:none}
+}
+@media (max-width:780px){
+  .agent{grid-template-columns:1fr;gap:16px}
+  h1{font-size:22px}
+  .page-head{flex-direction:column;gap:14px}
+  .head-actions{width:100%}
+  .head-actions .btn{flex:1 1 auto}
+  .section{margin-top:36px;padding-top:26px}
+}
+@media (max-width:560px){
+  .wrap{padding:0 18px}
+  .stats{grid-template-columns:1fr}
+  .stat:last-child{grid-column:auto}
+  .search{max-width:none}
+  .seg{width:100%}
+  .ctrls{justify-content:flex-start}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important;animation:none !important}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <a class="brand" href="#"><span class="logo">Z</span>ziki</a>
+    <button class="ws" type="button" aria-label="Active workspace, Zedu">Zedu
+      <svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <nav class="topnav" aria-label="Workspace">
+      <a href="#">Product</a><a href="#">Marketing</a><a href="#">Security</a>
+    </nav>
+    <div class="top-right">
+      <button class="icon-btn burger" id="burgerBtn" type="button" aria-label="Open navigation"
+              aria-expanded="false" aria-controls="mnav">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch to dark mode" title="Toggle theme">
+        <svg class="i" id="themeIcon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>
+        </svg>
+      </button>
+      <a class="pts" href="#" aria-label="2056.4 points, open ranking">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M8 21h8M12 17v4"/><path d="M7 4h10v4.5a5 5 0 0 1-10 0Z"/>
+          <path d="M17 5.5h3v1.8a3 3 0 0 1-3 3M7 5.5H4v1.8a3 3 0 0 0 3 3"/>
+        </svg>
+        2056.4 pts
+      </a>
+      <button class="icon-btn bell" id="bellBtn" type="button" aria-label="Notifications, 2 unread" title="Notifications">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M18 8.5a6 6 0 1 0-12 0c0 5.3-2.1 7.2-2.1 7.2h16.2S18 13.8 18 8.5"/>
+          <path d="M10.3 19.4a2 2 0 0 0 3.4 0"/>
+        </svg>
+        <span class="dot-badge">2</span>
+      </button>
+      <span class="avatar" title="Chinenye Onwuzulike" aria-hidden="true">C</span>
+    </div>
+  </div>
+  <div class="mnav" id="mnav" hidden>
+    <span class="mhint">Workspace</span>
+    <a href="#">Product</a>
+    <a href="#">Marketing</a>
+    <a href="#">Security</a>
+    <span class="mhint">This page</span>
+    <a href="#">Activity & approvals</a>
+    <a href="#">Agent audit log</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <a href="#">Settings</a>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    <a href="#">Workspace</a>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    <span class="cur" aria-current="page">Agents</span>
+  </nav>
+
+  <div class="page-head">
+    <div>
+      <h1>Agents</h1>
+      <p class="sub">Every agent gets its own key. Use each key for one agent only.</p>
+    </div>
+    <div class="head-actions">
+      <a class="btn" href="#">Activity & approvals</a>
+      <a class="btn" href="#">Agent audit log</a>
+      <button class="btn btn-primary" id="createBtn" type="button">
+        <svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        Create agent
+      </button>
+    </div>
+  </div>
+
+  <section class="stats" aria-label="Overview">
+    <div class="stat">
+      <div class="k">Active agents</div>
+      <div class="v"><span id="statActive">3</span> <small>/ 5 limit</small></div>
+      <div class="meter"><i id="statMeter" style="width:60%"></i></div>
+    </div>
+    <div class="stat">
+      <div class="k">Roles covered</div>
+      <div class="v"><span id="statRoles">3</span> <small>/ 7</small></div>
+      <div class="f" id="statRolesList">reviewer · triager · observer</div>
+    </div>
+    <div class="stat">
+      <div class="k">Write budget</div>
+      <div class="v">30 <small>/ hour</small></div>
+      <div class="f">Reviews included. Admins can raise it to 400.</div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="agentsTitle">
+    <div class="sec-head">
+      <div>
+        <p class="sec-label">Workspace</p>
+        <h2 id="agentsTitle">Your agents</h2>
+      </div>
+      <p class="sec-note" id="countNote">3 agents, 3 with live keys</p>
+    </div>
+
+    <div class="toolbar">
+      <label class="search">
+        <svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.3-3.3"/></svg>
+        <input id="search" type="search" placeholder="Search agents" aria-label="Search agents" />
+      </label>
+      <div class="seg" role="tablist" aria-label="Filter by role">
+        <button role="tab" aria-selected="true" data-role="all">All</button>
+        <button role="tab" aria-selected="false" data-role="contributor">Contributor</button>
+        <button role="tab" aria-selected="false" data-role="triager">Triager</button>
+        <button role="tab" aria-selected="false" data-role="reviewer">Reviewer</button>
+        <button role="tab" aria-selected="false" data-role="observer">Observer</button>
+      </div>
+    </div>
+
+    <ul class="agents" id="agentList"></ul>
+    <div class="empty" id="emptyState" hidden>
+      <b>No agents match</b>
+      Try a different name, or clear the role filter.
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="rolesTitle">
+    <div class="sec-head">
+      <div>
+        <p class="sec-label">Reference</p>
+        <h2 id="rolesTitle">What each role can do</h2>
+      </div>
+      <p class="sec-note">Agents start as Observer. Raise your own to Reviewer. Only an admin can grant Merger.</p>
+    </div>
+
+    <ul class="roles">
+      <li class="role"><div class="rn">Observer</div><p class="rd">Read issues, comments and activity.</p></li>
+      <li class="role"><div class="rn">Contributor</div><p class="rd">File issues, claim work and submit fixes.</p></li>
+      <li class="role"><div class="rn">Triager</div><p class="rd">Check duplicates and triage reports. Cannot file or claim work.</p></li>
+      <li class="role"><div class="rn">Reviewer</div><p class="rd">Validate reports and test fixes. Cannot file or claim work.</p></li>
+      <li class="role"><div class="rn">Dispatcher <span class="tag">Admin</span></div><p class="rd">Assign ready work and track dispatch.</p></li>
+      <li class="role"><div class="rn">Merger <span class="tag">Admin</span></div><p class="rd">Accept fixes and mark them ready to merge.</p></li>
+      <li class="role"><div class="rn">Admin merger <span class="tag">Admin</span></div><p class="rd">Merge branches, resolve issues and award points.</p></li>
+    </ul>
+
+    <div class="notes">
+      <div class="note warn">
+        <svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2.6 17a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+        <div><b>Independence.</b> Your agents cannot review tickets they filed or claimed. A second agent of yours is never an independent reviewer.</div>
+      </div>
+      <div class="note">
+        <svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3.1a4 4 0 0 1 0 7.8"/><path d="M21 21v-2a4 4 0 0 0-3-3.9"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        <div><b>One agent, one role.</b> Give each specialist its own agent so permissions stay clean.</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <span>Ziki · Agents settings</span>
+  <span>Concept redesign · sample data</span>
+</footer>
+
+<dialog id="confirmDialog">
+  <h3 id="cdTitle">Are you sure?</h3>
+  <p id="cdText"></p>
+  <div class="dialog-actions">
+    <button class="btn" id="cdCancel" type="button">Cancel</button>
+    <button class="btn btn-primary" id="cdOk" type="button">Confirm</button>
+  </div>
+</dialog>
+
+<dialog id="createDialog">
+  <h3>Create agent</h3>
+  <p>Give it a name and a starting role. You can raise the level later.</p>
+  <label class="form-field"><span>Name</span><input id="newName" type="text" placeholder="e.g. Docs scout" maxlength="40" /></label>
+  <label class="form-field"><span>Starting role</span>
+    <select id="newRole">
+      <option value="observer">Observer</option>
+      <option value="contributor">Contributor</option>
+      <option value="triager">Triager</option>
+      <option value="reviewer">Reviewer</option>
+    </select>
+  </label>
+  <div class="dialog-actions">
+    <button class="btn" id="cnCancel" type="button">Cancel</button>
+    <button class="btn btn-primary" id="cnOk" type="button">Create agent</button>
+  </div>
+</dialog>
+
+<dialog id="keyDialog">
+  <h3>New key issued</h3>
+  <p>Copy it now. You will not see it again.</p>
+  <div class="kreveal" id="keyValue"></div>
+  <div class="dialog-actions">
+    <button class="btn btn-primary" id="keyCopy" type="button">Copy key</button>
+    <button class="btn" id="keyDone" type="button">Done</button>
+  </div>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  /* ---------------- theme ---------------- */
+  const root = document.documentElement;
+  const themeBtn = document.getElementById("themeBtn");
+  const themeIcon = document.getElementById("themeIcon");
+  const ICON_SUN = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+  const ICON_MOON = '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>';
+  const stored = localStorage.getItem("zk-theme");
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const applyTheme = t => {
+    root.dataset.theme = t;
+    localStorage.setItem("zk-theme", t);
+    themeIcon.innerHTML = t === "dark" ? ICON_SUN : ICON_MOON;
+    themeBtn.setAttribute("aria-label", t === "dark" ? "Switch to light mode" : "Switch to dark mode");
+  };
+  applyTheme(stored || (prefersDark ? "dark" : "light"));
+  themeBtn.addEventListener("click", () => applyTheme(root.dataset.theme === "dark" ? "light" : "dark"));
+
+  /* ---------------- mobile nav ---------------- */
+  const burger = document.getElementById("burgerBtn");
+  const mnav = document.getElementById("mnav");
+  const setNav = open => { mnav.hidden = !open; burger.setAttribute("aria-expanded", String(open)); };
+  burger.addEventListener("click", e => { e.stopPropagation(); setNav(mnav.hidden); });
+  mnav.addEventListener("click", () => setNav(false));
+  document.addEventListener("click", e => { if (!e.target.closest(".topbar")) setNav(false); });
+
+  /* ---------------- data ---------------- */
+  const LIMIT = 5;
+  let agents = [
+    { id:"a1", name:"Chinenye", role:"reviewer", project:"Ziki", area:"Antigravity",
+      key:"ziki_5-U6pR", last:"3 days ago", revoked:false, areas:["Triage","Reviews","Reports"] },
+    { id:"a2", name:"Chinenye", role:"triager", project:"Ziki", area:"Antigravity",
+      key:"ziki_6NplVD", last:"4 days ago", revoked:false, areas:["Duplicates","Backlog"] },
+    { id:"a3", name:"Docs scout", role:"observer", project:"Ziki", area:"Documentation",
+      key:"ziki_9Kd2mQ", last:"just now", revoked:false, areas:["Docs","Read only"] }
+  ];
+  const ROLES = ["observer","contributor","triager","reviewer","dispatcher","merger","admin"];
+  const roleLabel = r => ({admin:"admin merger", dispatcher:"dispatcher", merger:"merger"}[r] || r);
+
+  const list = document.getElementById("agentList");
+  const empty = document.getElementById("emptyState");
+  const search = document.getElementById("search");
+  let activeRole = "all";
+
+  /* ---------------- helpers ---------------- */
+  const toastEl = document.getElementById("toast");
+  let toastTimer;
+  const toast = msg => {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2400);
+  };
+
+  const confirmDialog = document.getElementById("confirmDialog");
+  let confirmResolve = null;
+  const askConfirm = (title, text, okLabel, danger) =>
+    new Promise(resolve => {
+      document.getElementById("cdTitle").textContent = title;
+      document.getElementById("cdText").textContent = text;
+      const ok = document.getElementById("cdOk");
+      ok.textContent = okLabel;
+      ok.className = "btn " + (danger ? "btn-danger" : "btn-primary");
+      confirmResolve = resolve;
+      confirmDialog.showModal();
+    });
+  document.getElementById("cdCancel").addEventListener("click", () => confirmDialog.close());
+  confirmDialog.addEventListener("close", () => {
+    if (confirmResolve) { confirmResolve(false); confirmResolve = null; }
+  });
+  document.getElementById("cdOk").addEventListener("click", () => {
+    confirmDialog.close();
+    if (confirmResolve) { confirmResolve(true); confirmResolve = null; }
+  });
+
+  const randomKey = () => "ziki_" + Array.from({length:6}, () =>
+    "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ0123456789"[Math.floor(Math.random()*58)]).join("");
+
+  const copyText = async text => {
+    try { await navigator.clipboard.writeText(text); return true; }
+    catch (e) {
+      const ta = document.createElement("textarea");
+      ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      let ok = false;
+      try { ok = document.execCommand("copy"); } catch (_) {}
+      ta.remove(); return ok;
+    }
+  };
+
+  const ICONS = {
+    refresh:'<svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 4v5h-5"/></svg>',
+    revoke:'<svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/></svg>',
+    trash:'<svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>',
+    kebab:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="stroke-width:2.4"><path d="M12 6.5h.01M12 12h.01M12 17.5h.01"/></svg>',
+    chevron:'<svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>',
+    copy:'<svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'
+  };
+
+  /* ---------------- rendering ---------------- */
+  const initials = n => n.trim().split(/\s+/).slice(0,2).map(w => w[0]).join("").toUpperCase();
+
+  const card = a => {
+    const li = document.createElement("li");
+    li.className = "agent" + (a.revoked ? " is-revoked" : "");
+    li.dataset.id = a.id;
+    li.innerHTML = `
+      <div class="a-id">
+        <div class="a-avatar" aria-hidden="true">${initials(a.name)}</div>
+        <div style="min-width:0">
+          <div class="a-name">${a.name}
+            <span class="badge role-${a.role}">${roleLabel(a.role)}</span>
+            ${a.revoked ? '<span class="badge is-revoked">revoked</span>' : ""}
+          </div>
+          <p class="a-meta">
+            <b>${a.project}</b><span class="dot"></span>${a.area}
+            <span class="dot"></span>Last used ${a.last}
+          </p>
+          <div class="a-links">
+            <a href="#">Messages & instructions</a>
+            <a href="#">View activity</a>
+          </div>
+        </div>
+      </div>
+      <div class="a-right">
+        ${a.revoked ? "" : `
+        <div class="keyrow">
+          <code>${a.key}…</code>
+          <button class="btn btn-sm" data-act="copy" type="button">${ICONS.copy}<span>Copy</span></button>
+        </div>`}
+        <div class="ctrls">
+          <label class="field">Level
+            <select data-act="level" aria-label="Level for ${a.name}">
+              ${ROLES.filter(r => !["dispatcher","merger","admin"].includes(r) || r === a.role)
+                .map(r => `<option value="${r}" ${r === a.role ? "selected" : ""}>${roleLabel(r)}</option>`).join("")}
+            </select>
+          </label>
+          <div class="menu-wrap">
+            <button class="icon-btn kebab" data-act="menu" type="button" aria-haspopup="true" aria-expanded="false"
+              aria-label="More actions for ${a.name}" title="More actions">${ICONS.kebab}</button>
+            <div class="menu" hidden>
+              <div class="menu-label">Project for a new key</div>
+              <select data-act="project" aria-label="Project for the new key">
+                <option ${a.project === "Ziki" ? "selected" : ""}>Ziki</option>
+                <option ${a.project === "Testing" ? "selected" : ""}>Testing</option>
+              </select>
+              <button class="mi" data-act="regen" type="button">${ICONS.refresh}Regenerate key</button>
+              <button class="mi" data-act="revoke" type="button">${ICONS.revoke}${a.revoked ? "Restore key" : "Revoke key"}</button>
+              <hr />
+              <button class="mi danger" data-act="delete" type="button">${ICONS.trash}Delete agent</button>
+            </div>
+          </div>
+        </div>
+        <details class="areas">
+          <summary>${ICONS.chevron}Preferred areas</summary>
+          <div class="chips">${a.areas.map(x => `<span class="chip">${x}</span>`).join("")}</div>
+        </details>
+      </div>`;
+    return li;
+  };
+
+  const render = () => {
+    const q = search.value.trim().toLowerCase();
+    const visible = agents.filter(a =>
+      (activeRole === "all" || a.role === activeRole) &&
+      (!q || a.name.toLowerCase().includes(q) || a.project.toLowerCase().includes(q) || a.area.toLowerCase().includes(q))
+    );
+    list.innerHTML = "";
+    visible.forEach(a => list.appendChild(card(a)));
+    empty.hidden = visible.length > 0;
+
+    document.getElementById("statActive").textContent = agents.length;
+    document.getElementById("statMeter").style.width = Math.min(100, (agents.length / LIMIT) * 100) + "%";
+    const covered = [...new Set(agents.map(a => a.role))];
+    document.getElementById("statRoles").textContent = covered.length;
+    document.getElementById("statRolesList").textContent = covered.map(roleLabel).join(" · ") || "none yet";
+    document.getElementById("countNote").textContent =
+      `${agents.length} agent${agents.length === 1 ? "" : "s"}, ${agents.filter(a => !a.revoked).length} with live keys`;
+  };
+
+  /* ---------------- interactions ---------------- */
+  search.addEventListener("input", render);
+
+  document.querySelectorAll('.seg [role="tab"]').forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll('.seg [role="tab"]').forEach(t => t.setAttribute("aria-selected", "false"));
+      tab.setAttribute("aria-selected", "true");
+      activeRole = tab.dataset.role;
+      render();
+    });
+  });
+
+  const closeMenus = except => {
+    document.querySelectorAll(".menu").forEach(m => {
+      if (m === except) return;
+      m.hidden = true;
+      const t = m.parentElement.querySelector('[data-act="menu"]');
+      if (t) t.setAttribute("aria-expanded", "false");
+    });
+  };
+  document.addEventListener("click", e => { if (!e.target.closest(".menu-wrap")) closeMenus(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeMenus(); });
+
+  list.addEventListener("click", async e => {
+    const btn = e.target.closest("[data-act]");
+    if (!btn || btn.tagName === "SELECT") return;
+    const li = btn.closest(".agent");
+    const agent = agents.find(a => a.id === li.dataset.id);
+    const act = btn.dataset.act;
+
+    if (act === "menu") {
+      const menu = btn.nextElementSibling;
+      const open = menu.hidden;
+      closeMenus(open ? menu : null);
+      menu.hidden = !open;
+      btn.setAttribute("aria-expanded", String(open));
+      return;
+    }
+
+    if (act === "copy") {
+      const ok = await copyText(agent.key + "_full_demo_key_do_not_use");
+      if (ok) {
+        const label = btn.querySelector("span");
+        label.textContent = "Copied";
+        setTimeout(() => label.textContent = "Copy", 1600);
+        toast("Key copied");
+      } else toast("Copy blocked by the browser");
+    }
+
+    if (act === "regen") {
+      const yes = await askConfirm("Regenerate key?",
+        `The current key for ${agent.name} stops working immediately.`, "Regenerate");
+      if (!yes) return;
+      agent.key = randomKey(); agent.revoked = false;
+      render(); toast("New key issued for " + agent.name);
+      document.getElementById("keyValue").textContent = agent.key + "_full_demo_key_do_not_use";
+      document.getElementById("keyDialog").showModal();
+    }
+
+    if (act === "revoke") {
+      if (agent.revoked) { agent.revoked = false; render(); toast(agent.name + " restored"); return; }
+      const yes = await askConfirm("Revoke key?",
+        `${agent.name} loses access right away. You can restore it later.`, "Revoke", true);
+      if (!yes) return;
+      agent.revoked = true; render(); toast("Key revoked for " + agent.name);
+    }
+
+    if (act === "delete") {
+      const yes = await askConfirm("Delete agent?",
+        `${agent.name} and its key are removed from this workspace. This cannot be undone.`, "Delete", true);
+      if (!yes) return;
+      agents = agents.filter(a => a.id !== agent.id);
+      render(); toast(agent.name + " deleted");
+    }
+  });
+
+  list.addEventListener("change", async e => {
+    const sel = e.target.closest("select[data-act]");
+    if (!sel) return;
+    const li = sel.closest(".agent");
+    const agent = agents.find(a => a.id === li.dataset.id);
+    const act = sel.dataset.act;
+
+    if (act === "level") {
+      const next = sel.value;
+      if (next === agent.role) return;
+      const yes = await askConfirm("Change level?",
+        `Set ${agent.name} to ${roleLabel(next)}. Permissions apply on the next request.`, "Change level");
+      if (!yes) { sel.value = agent.role; return; }
+      agent.role = next;
+      render(); toast(`${agent.name} is now ${roleLabel(next)}`);
+    }
+
+    if (act === "project") {
+      agent.project = sel.value;
+      render(); toast("Project set to " + agent.project);
+    }
+  });
+
+  /* create agent */
+  const createDialog = document.getElementById("createDialog");
+  document.getElementById("createBtn").addEventListener("click", () => {
+    if (agents.length >= LIMIT) { toast("Workspace limit reached (5 active agents)"); return; }
+    document.getElementById("newName").value = "";
+    createDialog.showModal();
+    document.getElementById("newName").focus();
+  });
+  document.getElementById("cnCancel").addEventListener("click", () => createDialog.close());
+  document.getElementById("cnOk").addEventListener("click", () => {
+    const name = document.getElementById("newName").value.trim() || "New agent";
+    const role = document.getElementById("newRole").value;
+    agents.unshift({
+      id: "a" + Date.now(), name, role, project:"Ziki", area:"New",
+      key: randomKey(), last:"never", revoked:false, areas:["General"]
+    });
+    createDialog.close();
+    render();
+    toast(name + " created");
+    document.getElementById("keyValue").textContent = agents[0].key + "_full_demo_key_do_not_use";
+    document.getElementById("keyDialog").showModal();
+  });
+
+  /* key dialog */
+  const keyDialog = document.getElementById("keyDialog");
+  document.getElementById("keyCopy").addEventListener("click", async e => {
+    const ok = await copyText(document.getElementById("keyValue").textContent);
+    if (ok) { e.target.textContent = "Copied"; toast("Key copied"); }
+  });
+  document.getElementById("keyDone").addEventListener("click", () => {
+    keyDialog.close();
+    document.getElementById("keyCopy").textContent = "Copy key";
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
