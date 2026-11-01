@@ -249,6 +249,11 @@ h2{font-size:16.5px;font-weight:800;letter-spacing:-.015em;margin:0}
 .mi.danger{color:var(--bad-fg)}
 .mi.danger:hover{background:var(--bad-bg)}
 .menu hr{border:0;border-top:1px solid var(--divider);margin:6px 4px}
+.sync-qr-content{display:flex;flex-direction:column;align-items:center;gap:16px;padding:4px 0 8px}
+.sync-qr-frame{width:220px;height:220px;padding:18px;border:1px solid var(--border);border-radius:12px;background:var(--surface);display:grid;place-items:center}
+.sync-qr-grid{width:100%;aspect-ratio:1;display:grid;grid-template-columns:repeat(21,minmax(0,1fr));gap:1px;background:var(--surface-2)}
+.sync-qr-module{background:transparent}
+.sync-qr-module.is-filled{background:var(--text)}
 .areas{border-top:1px solid var(--divider);padding-top:12px;margin-top:2px}
 .areas summary{
   cursor:pointer;font-size:12.5px;font-weight:700;color:var(--text2);list-style:none;
@@ -595,12 +600,9 @@ dialog p{margin:0 0 16px;color:var(--text2);font-size:13px}
       <svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
     </button>
   </div>
-  <div style="display:flex;flex-direction:column;align-items:center;gap:16px;padding:4px 0 8px">
-    <div style="width:220px;height:220px;border:1px solid var(--border);border-radius:16px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;padding:18px">
-      <div style="width:100%;height:100%;background:repeating-linear-gradient(90deg, var(--text) 0 4px, transparent 4px 8px), repeating-linear-gradient(0deg, var(--text) 0 4px, transparent 4px 8px);opacity:.8;border-radius:8px;position:relative">
-        <div style="position:absolute;inset:24px;background:var(--surface-2);border-radius:4px"></div>
-        <div style="position:absolute;inset:42px;background:linear-gradient(135deg, #1f5fd9 0%, #7c5cff 100%);border-radius:4px"></div>
-      </div>
+  <div class="sync-qr-content">
+    <div class="sync-qr-frame" role="img" aria-label="QR code placeholder">
+      <div class="sync-qr-grid" id="syncQr" aria-hidden="true"></div>
     </div>
     <p style="margin:0;max-width:420px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6">Scan this code with your mobile device or external console to bridge workflows, approve budgets, or manually override this agent's actions.</p>
   </div>
@@ -752,6 +754,26 @@ dialog p{margin:0 0 16px;color:var(--text2);font-size:13px}
 
   /* ---------------- rendering ---------------- */
   const initials = n => n.trim().split(/\s+/).slice(0,2).map(w => w[0]).join("").toUpperCase();
+
+  const syncQr = document.getElementById("syncQr");
+  if (syncQr) {
+    const finder = (x, y, left, top) => {
+      const col = x - left, row = y - top;
+      if (col < 0 || col > 6 || row < 0 || row > 6) return null;
+      return col === 0 || col === 6 || row === 0 || row === 6 ||
+        (col >= 2 && col <= 4 && row >= 2 && row <= 4);
+    };
+    for (let y = 0; y < 21; y++) {
+      for (let x = 0; x < 21; x++) {
+        const module = document.createElement("span");
+        module.className = "sync-qr-module";
+        const corner = finder(x, y, 0, 0) ?? finder(x, y, 14, 0) ?? finder(x, y, 0, 14);
+        const filled = corner ?? ((x * 17 + y * 31 + x * y * 7) % 11 < 5);
+        if (filled) module.classList.add("is-filled");
+        syncQr.appendChild(module);
+      }
+    }
+  }
 
   const card = a => {
     const li = document.createElement("li");
