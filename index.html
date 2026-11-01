@@ -251,9 +251,14 @@ h2{font-size:16.5px;font-weight:800;letter-spacing:-.015em;margin:0}
 .menu hr{border:0;border-top:1px solid var(--divider);margin:6px 4px}
 .sync-qr-content{display:flex;flex-direction:column;align-items:center;gap:16px;padding:4px 0 8px}
 .sync-qr-frame{width:220px;height:220px;padding:18px;border:1px solid var(--border);border-radius:12px;background:var(--surface);display:grid;place-items:center}
-.sync-qr-grid{width:100%;aspect-ratio:1;display:grid;grid-template-columns:repeat(21,minmax(0,1fr));gap:1px;background:var(--surface-2)}
-.sync-qr-module{background:transparent}
+.sync-qr-grid{width:100%;aspect-ratio:1;display:grid;grid-template-columns:repeat(21,minmax(0,1fr));gap:1px;background:var(--surface-2);position:relative;overflow:hidden;isolation:isolate}
+.sync-qr-module{background:transparent;position:relative;z-index:1}
 .sync-qr-module.is-filled{background:var(--text)}
+.sync-qr-grid::before,.sync-qr-grid::after{content:"";position:absolute;left:-4%;right:-4%;pointer-events:none;z-index:2}
+.sync-qr-grid::before{top:0;height:2px;background:var(--accent);box-shadow:0 0 7px color-mix(in srgb,var(--accent) 72%,transparent);animation:syncQrScanLine 3s cubic-bezier(.4,0,.2,1) infinite}
+.sync-qr-grid::after{top:-24%;height:24%;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--accent) 14%,transparent));animation:syncQrScanGlow 3s cubic-bezier(.4,0,.2,1) infinite}
+@keyframes syncQrScanLine{0%{top:0;opacity:0}8%{opacity:1}90%{opacity:1}100%{top:100%;opacity:0}}
+@keyframes syncQrScanGlow{0%{top:-24%;opacity:0}8%{opacity:1}90%{opacity:1}100%{top:100%;opacity:0}}
 .areas{border-top:1px solid var(--divider);padding-top:12px;margin-top:2px}
 .areas summary{
   cursor:pointer;font-size:12.5px;font-weight:700;color:var(--text2);list-style:none;
