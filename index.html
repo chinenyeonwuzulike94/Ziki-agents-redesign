@@ -586,6 +586,29 @@ dialog p{margin:0 0 16px;color:var(--text2);font-size:13px}
   </div>
 </dialog>
 
+<dialog id="syncDialog" class="wide">
+  <div class="dlg-head">
+    <div>
+      <h3>Human-Agent Interaction Sync</h3>
+    </div>
+    <button class="icon-btn" data-close="syncDialog" type="button" aria-label="Close">
+      <svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:16px;padding:4px 0 8px">
+    <div style="width:220px;height:220px;border:1px solid var(--border);border-radius:16px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;padding:18px">
+      <div style="width:100%;height:100%;background:repeating-linear-gradient(90deg, var(--text) 0 4px, transparent 4px 8px), repeating-linear-gradient(0deg, var(--text) 0 4px, transparent 4px 8px);opacity:.8;border-radius:8px;position:relative">
+        <div style="position:absolute;inset:24px;background:var(--surface-2);border-radius:4px"></div>
+        <div style="position:absolute;inset:42px;background:linear-gradient(135deg, #1f5fd9 0%, #7c5cff 100%);border-radius:4px"></div>
+      </div>
+    </div>
+    <p style="margin:0;max-width:420px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6">Scan this code with your mobile device or external console to bridge workflows, approve budgets, or manually override this agent's actions.</p>
+  </div>
+  <div class="dialog-actions">
+    <button class="btn" data-close="syncDialog" type="button">Close</button>
+  </div>
+</dialog>
+
 <dialog id="activityDialog" class="wide" aria-labelledby="activityTitle">
   <div class="dlg-head">
     <div>
@@ -765,19 +788,22 @@ dialog p{margin:0 0 16px;color:var(--text2);font-size:13px}
                 .map(r => `<option value="${r}" ${r === a.role ? "selected" : ""}>${roleLabel(r)}</option>`).join("")}
             </select>
           </label>
-          <div class="menu-wrap">
-            <button class="icon-btn kebab" data-act="menu" type="button" aria-haspopup="true" aria-expanded="false"
-              aria-label="More actions for ${a.name}" title="More actions">${ICONS.kebab}</button>
-            <div class="menu" hidden>
-              <div class="menu-label">Project for a new key</div>
-              <select data-act="project" aria-label="Project for the new key">
-                <option ${a.project === "Ziki" ? "selected" : ""}>Ziki</option>
-                <option ${a.project === "Testing" ? "selected" : ""}>Testing</option>
-              </select>
-              <button class="mi" data-act="regen" type="button">${ICONS.refresh}Regenerate key</button>
-              <button class="mi" data-act="revoke" type="button">${ICONS.revoke}${a.revoked ? "Restore key" : "Revoke key"}</button>
-              <hr />
-              <button class="mi danger" data-act="delete" type="button">${ICONS.trash}Delete agent</button>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <button class="btn btn-sm" data-act="sync" type="button">Sync Session</button>
+            <div class="menu-wrap">
+              <button class="icon-btn kebab" data-act="menu" type="button" aria-haspopup="true" aria-expanded="false"
+                aria-label="More actions for ${a.name}" title="More actions">${ICONS.kebab}</button>
+              <div class="menu" hidden>
+                <div class="menu-label">Project for a new key</div>
+                <select data-act="project" aria-label="Project for the new key">
+                  <option ${a.project === "Ziki" ? "selected" : ""}>Ziki</option>
+                  <option ${a.project === "Testing" ? "selected" : ""}>Testing</option>
+                </select>
+                <button class="mi" data-act="regen" type="button">${ICONS.refresh}Regenerate key</button>
+                <button class="mi" data-act="revoke" type="button">${ICONS.revoke}${a.revoked ? "Restore key" : "Revoke key"}</button>
+                <hr />
+                <button class="mi danger" data-act="delete" type="button">${ICONS.trash}Delete agent</button>
+              </div>
             </div>
           </div>
         </div>
@@ -837,6 +863,15 @@ dialog p{margin:0 0 16px;color:var(--text2);font-size:13px}
     const li = btn.closest(".agent");
     const agent = agents.find(a => a.id === li.dataset.id);
     const act = btn.dataset.act;
+
+    if (act === "sync") {
+      const dialog = document.getElementById("syncDialog");
+      if (dialog) {
+        dialog.showModal();
+      }
+      closeMenus();
+      return;
+    }
 
     if (act === "menu") {
       const menu = btn.nextElementSibling;
