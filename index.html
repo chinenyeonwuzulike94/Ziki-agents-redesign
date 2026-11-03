@@ -820,20 +820,22 @@ dialog p{margin:0 0 16px;color:var(--text2);font-size:13px}
                 .map(r => `<option value="${r}" ${r === a.role ? "selected" : ""}>${roleLabel(r)}</option>`).join("")}
             </select>
           </label>
-          <div class="menu-wrap">
-            <button class="icon-btn kebab" data-act="menu" type="button" aria-haspopup="true" aria-expanded="false"
-              aria-label="More actions for ${a.name}" title="More actions">${ICONS.kebab}</button>
-            <div class="menu" hidden>
-              <div class="menu-label">Project for a new key</div>
-              <select data-act="project" aria-label="Project for the new key">
-                <option ${a.project === "Ziki" ? "selected" : ""}>Ziki</option>
-                <option ${a.project === "Testing" ? "selected" : ""}>Testing</option>
-              </select>
-              <button class="mi" data-act="sync" type="button">${ICONS.refresh}Sync Session</button>
-              <button class="mi" data-act="regen" type="button">${ICONS.refresh}Regenerate key</button>
-              <button class="mi" data-act="revoke" type="button">${ICONS.revoke}${a.revoked ? "Restore key" : "Revoke key"}</button>
-              <hr />
-              <button class="mi danger" data-act="delete" type="button">${ICONS.trash}Delete agent</button>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-sm" data-act="sync" type="button">Sync Session</button>
+            <div class="menu-wrap">
+              <button class="icon-btn kebab" data-act="menu" type="button" aria-haspopup="true" aria-expanded="false"
+                aria-label="More actions for ${a.name}" title="More actions">${ICONS.kebab}</button>
+              <div class="menu" hidden>
+                <div class="menu-label">Project for a new key</div>
+                <select data-act="project" aria-label="Project for the new key">
+                  <option ${a.project === "Ziki" ? "selected" : ""}>Ziki</option>
+                  <option ${a.project === "Testing" ? "selected" : ""}>Testing</option>
+                </select>
+                <button class="mi" data-act="regen" type="button">${ICONS.refresh}Regenerate key</button>
+                <button class="mi" data-act="revoke" type="button">${ICONS.revoke}${a.revoked ? "Restore key" : "Revoke key"}</button>
+                <hr />
+                <button class="mi danger" data-act="delete" type="button">${ICONS.trash}Delete agent</button>
+              </div>
             </div>
           </div>
         </div>
