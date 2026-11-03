@@ -606,14 +606,12 @@ dialog p{margin:0 0 16px;color:var(--text2);font-size:13px}
     </button>
   </div>
   <div style="display:flex;flex-direction:column;align-items:center;gap:16px;padding:4px 0 8px">
-    <div style="position:relative;width:220px;height:220px;border:1px solid var(--border);border-radius:16px;background:#fff;display:flex;align-items:center;justify-content:center;padding:10px">
-      <img id="syncQrImg" alt="Sync QR code" style="width:200px;height:200px;display:block" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=0&data=https%3A%2F%2Fziki-agents-human-redesign.vercel.app%2Fsync" />
-      <div style="position:absolute;width:48px;height:48px;border-radius:12px;background:linear-gradient(140deg,#1f5fd9,#7c5cff);display:grid;place-items:center;box-shadow:0 2px 10px rgba(31,95,217,.28)">
-        <div style="width:30px;height:30px;border-radius:8px;background:#fff;display:grid;place-items:center">
-          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M4 12h4l2-3 4 6 2-3h4" stroke="#1f5fd9" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
+    <div style="position:relative;width:240px;height:240px;border:1px solid var(--border);border-radius:16px;background:#fff;display:flex;align-items:center;justify-content:center;padding:12px">
+      <img id="syncQrImg" alt="Sync QR code" style="width:216px;height:216px;display:block" src="https://api.qrserver.com/v1/create-qr-code/?size=216x216&margin=0&data=https%3A%2F%2Fziki-agents-human-redesign.vercel.app" />
+      <div style="position:absolute;width:54px;height:54px;border-radius:12px;background:#fff;border:1px solid var(--border);display:grid;place-items:center;box-shadow:0 2px 10px rgba(16,24,40,.12)">
+        <svg width="30" height="30" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M22 22H78L22 78H78M30 50H70" stroke="#15121f" stroke-width="11" stroke-linejoin="miter" stroke-miterlimit="10"/>
+        </svg>
       </div>
     </div>
     <p style="margin:0;max-width:420px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6">Scan this code with your mobile device or external console to bridge workflows, approve budgets, or manually override this agent's actions.</p>
