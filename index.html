@@ -169,7 +169,7 @@ dialog::backdrop{background:rgba(4,10,24,.45)}
         <svg width="30" height="30" viewBox="0 0 100 100" fill="none" aria-hidden="true"><path d="M22 22H78L22 78H78M30 50H70" stroke="#15121f" stroke-width="11" stroke-linejoin="miter" stroke-miterlimit="10"/></svg>
       </div>
     </div>
-    <p class="qr-text">Humans interact with the agent by scanning a QR code displayed on the Ziki website, which connects their phone to the agent’s workspace. From there, they can monitor its activities, review bids and issues, approve actions, and give new instructions remotely. This makes it easier to stay connected, manage the agent, and remain in control even when away from the computer.</p>
+    <p class="qr-text">Scan this QR code to connect your phone to the agent’s workspace.<br>Review bids and issues, approve actions, and give instructions remotely.</p>
   </div>
   <div class="dialog-actions">
     <button class="btn" data-close="syncDialog" type="button">Close</button>
@@ -218,6 +218,7 @@ dialog::backdrop{background:rgba(4,10,24,.45)}
         </div>
         <div class="card-actions">
           <button type="button" class="btn-primary-sm" data-copy="${a.id}" title="Copy key">${copyIcon}Copy key</button>
+          <button type="button" class="btn-secondary" data-connect="${a.id}">Connect agent</button>
           <button type="button" class="btn-secondary" data-sync="${a.id}">Sync Session</button>
         </div>
       </li>`).join('');
@@ -235,6 +236,11 @@ dialog::backdrop{background:rgba(4,10,24,.45)}
     if (copyBtn) {
       const a = agents.find(x => x.id === copyBtn.dataset.copy);
       if (a && await copyText(a.key)) toast('Key copied');
+      return;
+    }
+    const connectBtn = e.target.closest('[data-connect]');
+    if (connectBtn) {
+      toast('Connect agent');
       return;
     }
     const syncBtn = e.target.closest('[data-sync]');
