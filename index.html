@@ -602,7 +602,7 @@ dialog p{margin:0 0 16px;color:var(--text2);font-size:13px}
         </svg>
       </div>
     </div>
-    <p style="margin:0;max-width:420px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6">Scan to link your mobile AI agent to this workspace. With your phone, you can review bids, award issues, and prompt your agent to work on them while on the go.</p>
+    <p style="margin:0;max-width:420px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6">Humans interact with the agent by scanning a QR code displayed on the Ziki website, which connects their phone to the agent’s workspace. From there, they can monitor its activities, review bids and issues, approve actions, and give new instructions remotely. This makes it easier to stay connected, manage the agent, and remain in control even when away from the computer.</p>
   </div>
   <div class="dialog-actions">
     <button class="btn" data-close="syncDialog" type="button">Close</button>
@@ -1101,16 +1101,76 @@ dialog p{margin:0 0 16px;color:var(--text2);font-size:13px}
     renderLog();
   });
 
-  const openDialog = id => document.getElementById(id).showModal();
-  document.getElementById("openActivity").addEventListener("click", () => openDialog("activityDialog"));
-  document.getElementById("openAudit").addEventListener("click", () => openDialog("auditDialog"));
+  const openDialog = id => {
+    const d = document.getElementById(id);
+    if (d && typeof d.showModal === "function") d.showModal();
+  };
+  const closeDialog = id => {
+    const d = document.getElementById(id);
+    if (d && typeof d.close === "function") d.close();
+  };
+
+  const openActivity = document.getElementById("openActivity");
+  if (openActivity) openActivity.addEventListener("click", () => openDialog("activityDialog"));
+  const openAudit = document.getElementById("openAudit");
+  if (openAudit) openAudit.addEventListener("click", () => openDialog("auditDialog"));
+
   document.querySelectorAll("[data-close]").forEach(b =>
-    b.addEventListener("click", () => document.getElementById(b.dataset.close).close()));
+    b.addEventListener("click", () => closeDialog(b.dataset.close)));
   document.querySelectorAll("[data-open]").forEach(a => a.addEventListener("click", e => {
     e.preventDefault();
     setNav(false);
     openDialog(a.dataset.open === "activity" ? "activityDialog" : "auditDialog");
   }));
+
+  const createDialog = document.getElementById("createDialog");
+  const createBtn = document.getElementById("createBtn");
+  if (createBtn && createDialog) {
+    createBtn.addEventListener("click", () => {
+      const nameInput = document.getElementById("newName");
+      if (nameInput) nameInput.value = "";
+      createDialog.showModal();
+      if (nameInput) nameInput.focus();
+    });
+  }
+  const cnCancel = document.getElementById("cnCancel");
+  if (cnCancel && createDialog) cnCancel.addEventListener("click", () => createDialog.close());
+  const cnOk = document.getElementById("cnOk");
+  if (cnOk && createDialog) {
+    cnOk.addEventListener("click", () => {
+      const nameInput = document.getElementById("newName");
+      const roleInput = document.getElementById("newRole");
+      const name = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : "New agent";
+      const role = roleInput ? roleInput.value : "observer";
+      agents.unshift({
+        id: "a" + Date.now(), name, role, project:"Ziki", area:"New",
+        key: randomKey(), last:"never", revoked:false, areas:["General"]
+      });
+      createDialog.close();
+      render();
+      toast(name + " created");
+      const keyValue = document.getElementById("keyValue");
+      const keyDialog = document.getElementById("keyDialog");
+      if (keyValue) keyValue.textContent = agents[0].key + "_full_demo_key_do_not_use";
+      if (keyDialog) keyDialog.showModal();
+    });
+  }
+
+  const keyDialog = document.getElementById("keyDialog");
+  const keyCopy = document.getElementById("keyCopy");
+  if (keyCopy) {
+    keyCopy.addEventListener("click", async e => {
+      const keyValue = document.getElementById("keyValue");
+      const ok = await copyText(keyValue ? keyValue.textContent : "");
+      if (ok) {
+        e.target.textContent = "Copied";
+        toast("Key copied");
+        setTimeout(() => { e.target.textContent = "Copy key"; }, 1600);
+      }
+    });
+  }
+  const keyDone = document.getElementById("keyDone");
+  if (keyDone && keyDialog) keyDone.addEventListener("click", () => keyDialog.close());
 
   renderReqs();
   renderLog();
